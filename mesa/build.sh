@@ -1,10 +1,14 @@
 #!/bin/bash
-# Build mesa-switch-legacy (Mesa 20.1 with devkitPro's Switch port and the
-# Wine-NX changes: EGL, OpenGL and GLES through Gallium nvc0 over
-# libdrm_nouveau) from the checkout in the current directory, and install it
-# into portlibs as devkitPro's switch-mesa package does.
+# Build mesa-switch-legacy (Mesa 20.1 with devkitPro's Switch port: EGL,
+# OpenGL and GLES through Gallium nvc0 over libdrm_nouveau) from the checkout
+# in the current directory, and install it into portlibs as devkitPro's
+# switch-mesa package does.
 set -euo pipefail
 portlibs=/opt/devkitpro/portlibs/switch
+
+# devkitA64's newlib now declares timespec_get, which Mesa 20.1's C11 threads
+# header defines as static.
+git apply /usr/local/share/switch-dev/mesa/timespec_get.patch
 
 # The same configuration as switch-mesa's PKGBUILD: the switch platform, nvc0
 # and static libraries are the port's defaults in meson.build.

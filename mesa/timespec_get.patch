@@ -1,0 +1,15 @@
+diff --git a/include/c11/threads.h b/include/c11/threads.h
+index b512521..b456643 100644
+--- a/include/c11/threads.h
++++ b/include/c11/threads.h
+@@ -46,6 +46,10 @@
+ #ifndef HAVE_TIMESPEC_GET
+ #include <sys/time.h>
+ 
++#ifdef __SWITCH__
++/* devkitA64's newlib declares a non-static timespec_get: keep this fallback apart. */
++#define timespec_get mesa_timespec_get
++#endif
+ static inline int
+ timespec_get(struct timespec *ts, int base)
+ {

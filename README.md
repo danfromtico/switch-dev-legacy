@@ -2,7 +2,7 @@
 
 A Docker image for building Horizon (Nintendo Switch) homebrew against the
 legacy OpenGL stack: devkitA64 with Mesa 20.1's nvc0 over libdrm_nouveau, as
-devkitPro ships it but with the Wine-NX changes, a newer libnx, and USB drives
+devkitPro ships it, built from source against a newer libnx, and USB drives
 with UASP and read-only NTFS. Each comes from a pinned revision.
 
 It is the legacy counterpart of
@@ -12,10 +12,13 @@ Mesa 26 (nvc0, Zink and NVK Vulkan).
 | In portlibs | Revision | |
 |---|---|---|
 | [libnx](https://github.com/switchbrew/libnx) | `feebd026` | newer than devkitPro's 4.12.0 release |
-| [libdrm-nouveau-legacy](https://github.com/danfromtico/libdrm-nouveau-legacy) | `a652eb2e` | devkitPro's libdrm_nouveau 1.0.1 with the Wine-NX changes: buffer object reuse, pinned application memory. Replaces `switch-libdrm_nouveau`. |
-| [mesa-switch-legacy](https://github.com/danfromtico/mesa-switch-legacy) | `956633be` | Mesa 20.1 with devkitPro's Switch port and the Wine-NX changes: EGL, OpenGL and GLES through nvc0, GPU texture uploads, `GL_AMD_pinned_memory`, 3D-engine copies. Replaces `switch-mesa`, built the same way. |
+| [libdrm-nouveau-legacy](https://github.com/danfromtico/libdrm-nouveau-legacy) | `13726518` | devkitPro's libdrm_nouveau 1.0.1, as released. Replaces `switch-libdrm_nouveau`. |
+| [mesa-switch-legacy](https://github.com/danfromtico/mesa-switch-legacy) | `71ed2d36` | Mesa 20.1 with devkitPro's Switch port, as released, plus `mesa/timespec_get.patch` for today's devkitA64: EGL, OpenGL and GLES through nvc0. Replaces `switch-mesa`, built the same way. |
 | [libusbhsfs](https://github.com/ITotalJustice/libusbhsfs) | `625269b7` | with the UASP transport in `libusbhsfs/`; FAT and exFAT, and NTFS read-only through usbntfs: `libusbhsfs.a` |
 | [usbntfs](https://github.com/danfromtico/usbntfs) | `d4858960` | read-only NTFS without GPL code, in `no_std` Rust: `libusbntfs.a` |
+
+The forks' later Wine-NX commits are left out: with them, ImGui overlays lose
+glyphs and draw in the wrong colours.
 
 There is no Vulkan driver: Mesa 20.1 has none for this GPU.
 

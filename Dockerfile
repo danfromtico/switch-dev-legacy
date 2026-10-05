@@ -2,8 +2,9 @@
 # danfromtico/switch-dev-legacy: devkitA64 with the legacy OpenGL stack, each
 # from a pinned revision:
 #   libnx                  switchbrew/libnx, newer than devkitPro's release
-#   libdrm-nouveau-legacy  devkitPro's libdrm_nouveau with the Wine-NX changes
-#   mesa-switch-legacy     Mesa 20.1: EGL/OpenGL/GLES through nvc0
+#   libdrm-nouveau-legacy  devkitPro's libdrm_nouveau 1.0.1
+#   mesa-switch-legacy     Mesa 20.1 with devkitPro's Switch port: EGL/OpenGL/GLES
+#                          through nvc0
 #   libusbhsfs             with the UASP transport and usbntfs' read-only NTFS
 #   usbntfs                read-only NTFS for libusbhsfs, in Rust
 # and the tools to build them and more: Meson, CMake, Ninja, Rust nightly and
@@ -14,9 +15,9 @@ FROM ${DEVKITA64}
 
 ARG LIBNX_REVISION=feebd026ca0f5dcc2119f46ad8e0d16ad3dd4973
 ARG LIBDRM_NOUVEAU_REPOSITORY=https://github.com/danfromtico/libdrm-nouveau-legacy.git
-ARG LIBDRM_NOUVEAU_REVISION=a652eb2e7811d012623ba4904cbb540476e2d7ae
+ARG LIBDRM_NOUVEAU_REVISION=137265185c95cf58ce94c7afecba14f895dac2a7
 ARG MESA_SWITCH_REPOSITORY=https://github.com/danfromtico/mesa-switch-legacy.git
-ARG MESA_SWITCH_REVISION=956633be3105312a434fa277085bc6fc54f94b7d
+ARG MESA_SWITCH_REVISION=71ed2d36b6a49d69bb351f60f69ac197442fd769
 ARG LIBUSBHSFS_REVISION=625269b7725a6e2a3f2724e8d45b602c1b20ead5
 ARG USBNTFS_REVISION=d48589608057cfbb280d42d20c655cb825f12dd4
 ARG RUST_TOOLCHAIN=nightly-2026-09-08
@@ -60,16 +61,19 @@ RUN git init -q /tmp/libnx \
     && rm -rf /tmp/libnx
 
 # --- libdrm-nouveau-legacy and mesa-switch-legacy ------------------------------
-# They replace devkitPro's switch-libdrm_nouveau and switch-mesa, which they
-# are built from, and install the same files.
+# devkitPro's own switch-libdrm_nouveau and switch-mesa, built from source
+# against this libnx: the forks at the revisions devkitPro released, before
+# the Wine-NX changes, with which ImGui overlays lose glyphs and draw in the
+# wrong colours. They install the same files as the packages.
 COPY mesa /usr/local/share/switch-dev/mesa
 RUN dkp-pacman -Rdd --noconfirm switch-mesa switch-libdrm_nouveau \
     && git clone -q ${LIBDRM_NOUVEAU_REPOSITORY} /tmp/libdrm_nouveau \
     && git -C /tmp/libdrm_nouveau checkout -q ${LIBDRM_NOUVEAU_REVISION} \
     && make -C /tmp/libdrm_nouveau -j"$(nproc)" \
     && make -C /tmp/libdrm_nouveau install \
-    && install -Dm644 /tmp/libdrm_nouveau/README.md \
-        /opt/devkitpro/portlibs/switch/share/licenses/libdrm-nouveau-legacy/README.md \
+    && mkdir -p /opt/devkitpro/portlibs/switch/share/licenses/libdrm-nouveau-legacy \
+    && sed -n '1,/\*\//p' /tmp/libdrm_nouveau/source/nouveau.c \
+        > /opt/devkitpro/portlibs/switch/share/licenses/libdrm-nouveau-legacy/LICENSE \
     && rm -rf /tmp/libdrm_nouveau
 RUN git clone -q ${MESA_SWITCH_REPOSITORY} /tmp/mesa-switch \
     && git -C /tmp/mesa-switch checkout -q ${MESA_SWITCH_REVISION} \
